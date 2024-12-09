@@ -14,6 +14,8 @@ const {
   addWeeklyProfitEntry,
   getWeeklyProfitEntries,
   deleteWeeklyProfitEntry,
+  calculateNetProfit,
+  calculateNetProfitSummary,
 } = require("../controllers/userController");
 const { userProtect } = require("../middlewares/authMiddleware");
 
@@ -56,5 +58,12 @@ router.get("/getprofit-entries/:userId", userProtect, getWeeklyProfitEntries);
 
 // Delete Specific Profit Entry
 router.delete("/delete-profit-entry", userProtect, deleteWeeklyProfitEntry);
+
+// Calculate Net Profit Summary
+router.get(
+  "/net-profit-summary/:userId",
+  userProtect,
+  calculateNetProfitSummary
+);
 
 module.exports = router;

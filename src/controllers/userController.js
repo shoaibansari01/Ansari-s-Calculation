@@ -663,3 +663,106 @@ exports.deleteWeeklyProfitEntry = async (req, res) => {
     });
   }
 };
+
+// Calculate Net Profit Across All Dates
+exports.calculateNetProfitSummary = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({
+        message: "Invalid User ID",
+      });
+    }
+
+    // Find all columns for the user
+    const columns = await HistoricalColumn.find({
+      userId: new mongoose.Types.ObjectId(userId),
+    });
+
+    // Find all weekly profit entries for the user
+    const weeklyProfitEntries = await WeeklyProfit.find({
+      userId: new mongoose.Types.ObjectId(userId),
+    });
+
+    // Create a map to store daily calculations
+    const dailyCalculations = new Map();
+
+    // Process column entries
+    columns.forEach((column) => {
+      column.entries.forEach((entry) => {
+        const entryDate = new Date(entry.date).toISOString().split("T")[0];
+
+        if (!dailyCalculations.has(entryDate)) {
+          dailyCalculations.set(entryDate, {
+            totalColumnValue: 0,
+            totalProfit: 0,
+          });
+        }
+
+        const dailyData = dailyCalculations.get(entryDate);
+        if (typeof entry.value === "number") {
+          dailyData.totalColumnValue += entry.value;
+        }
+      });
+    });
+
+    // Process profit entries
+    weeklyProfitEntries.forEach((weekProfit) => {
+      weekProfit.entries.forEach((entry) => {
+        const entryDate = new Date(entry.date).toISOString().split("T")[0];
+
+        if (!dailyCalculations.has(entryDate)) {
+          dailyCalculations.set(entryDate, {
+            totalColumnValue: 0,
+            totalProfit: 0,
+          });
+        }
+
+        const dailyData = dailyCalculations.get(entryDate);
+        dailyData.totalProfit += entry.amount;
+      });
+    });
+
+    // Calculate net profit for each date
+    const netProfitSummary = Array.from(dailyCalculations.entries())
+      .map(([date, data]) => ({
+        date,
+        totalColumnValue: data.totalColumnValue,
+        totalProfit: data.totalProfit,
+        netProfit: data.totalProfit - data.totalColumnValue,
+      }))
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    // Calculate overall summary
+    const overallSummary = netProfitSummary.reduce(
+      (summary, daily) => {
+        summary.totalColumnValueOverall += daily.totalColumnValue;
+        summary.totalProfitOverall += daily.totalProfit;
+        summary.netProfitOverall += daily.netProfit;
+        return summary;
+      },
+      {
+        totalColumnValueOverall: 0,
+        totalProfitOverall: 0,
+        netProfitOverall: 0,
+      }
+    );
+
+    res.status(200).json({
+      message: "Net profit calculated successfully",
+      dailyNetProfit: netProfitSummary,
+      overallSummary: {
+        totalColumnValue: overallSummary.totalColumnValueOverall,
+        totalProfit: overallSummary.totalProfitOverall,
+        netProfit: overallSummary.netProfitOverall,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error calculating net profit",
+      error: error.message,
+    });
+  }
+};
