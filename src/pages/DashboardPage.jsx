@@ -65,7 +65,7 @@ const DashboardPage = () => {
 
     return (
         <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-            <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-2xl relative">
+            <div className="bg-white p-6 rounded-xl shadow-md w-full max-w-4xl relative">
                 {/* Add Column Entry Button */}
                 <button
                     onClick={handleAddColumnEntry}
@@ -79,8 +79,8 @@ const DashboardPage = () => {
 
                 {/* User Info Section */}
                 <div className="text-center mb-6">
-                    <p className="text-xl mb-2">Welcome, <strong className="text-blue-600">{user.username}</strong>!</p>
-                    <p className="text-gray-600">Email: {user.email}</p>
+                    <p className="text-lg md:text-xl mb-2">Welcome, <strong className="text-blue-600">{user.username}</strong>!</p>
+                    <p className="text-gray-600 text-sm md:text-base">Email: {user.email}</p>
                 </div>
 
                 {/* Net Profit Summary */}
@@ -91,7 +91,7 @@ const DashboardPage = () => {
                         <h2 className="text-2xl font-semibold mb-4 text-center text-gray-700">Profit Overview</h2>
 
                         {/* Overall Summary */}
-                        <div className="grid grid-cols-3 gap-4 mb-6 text-center">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6 text-center">
                             <div className="bg-blue-100 p-4 rounded-lg">
                                 <p className="text-sm text-gray-600">Total Investment</p>
                                 <p className="font-bold text-blue-800">
@@ -119,14 +119,14 @@ const DashboardPage = () => {
                                 {netProfitData.dailyNetProfit.map((day, index) => (
                                     <div
                                         key={index}
-                                        className="flex justify-between items-center bg-white p-3 rounded-lg shadow-sm"
+                                        className="flex flex-col sm:flex-row justify-between items-center bg-white p-3 rounded-lg shadow-sm"
                                     >
-                                        <div>
+                                        <div className="mb-2 sm:mb-0">
                                             <p className="font-medium text-gray-700">
                                                 {formatDate(day.date)}
                                             </p>
                                         </div>
-                                        <div className="text-right">
+                                        <div className="text-right space-y-1">
                                             <p className="text-sm text-gray-600">
                                                 Investment: {formatCurrency(day.totalColumnValue)}
                                             </p>
@@ -150,7 +150,7 @@ const DashboardPage = () => {
                 <div className="text-center mt-6">
                     <button
                         onClick={handleLogout}
-                        className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 transition-colors"
+                        className="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 transition-colors w-full sm:w-auto"
                     >
                         Logout
                     </button>
